@@ -74,7 +74,7 @@ jobs:
         run: python sim_datalake.py direto --anos $ANOS --apagar-zip
 
       - name: Agregar óbitos diários por ocorrência (para o painel)
-        run: python painel/agregar_obitos.py --raiz datalake --saida obitos_diarios_ocorrencia_mrj.csv
+        run: python agregar_obitos.py --raiz datalake --saida obitos_diarios_ocorrencia_mrj.csv
 
       - name: Empacotar silver
         run: tar -czf "$ASSET" -C datalake silver qa
