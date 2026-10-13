@@ -1,0 +1,96 @@
+name: Atualizar clima (MRJ)
+
+on:
+  schedule:
+    # Dia 6 de cada mês, 08:00 UTC (05:00 em Brasília)
+    - cron: "0 8 6 * *"
+  workflow_dispatch:
+    inputs:
+      anos:
+        description: >
+          Anos a processar, separados por espaço (ex.: "2023 2024"). Vazio = ano anterior + ano corrente.
+          Carga inicial: "2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026"
+          (leva cerca de uma hora; se estourar o tempo, divida em dois lotes).
+        required: false
+        default: ""
+      fontes:
+        description: 'Fontes: "inmet alertario" (padrão), "inmet" ou "alertario"'
+        required: false
+        default: "inmet alertario"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-clima
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: clima-mrj
+      ASSET: clima_mrj.tar.gz
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Definir anos e fontes
+        id: par
+        env:
+          ENTRADA: ${{ github.event.inputs.anos }}
+          FONTES: ${{ github.event.inputs.fontes }}
+        run: |
+          if [ -z "$ENTRADA" ]; then
+            ANO=$(date +%Y)
+            ENTRADA="$((ANO-1)) $ANO"
+          fi
+          if [ -z "$FONTES" ]; then FONTES="inmet alertario"; fi
+          if ! [[ "$ENTRADA" =~ ^[0-9]{4}( [0-9]{4})*$ ]]; then
+            echo "Entrada inválida para anos: $ENTRADA" >&2; exit 1
+          fi
+          if ! [[ "$FONTES" =~ ^(inmet|alertario)( (inmet|alertario))?$ ]]; then
+            echo "Entrada inválida para fontes: $FONTES" >&2; exit 1
+          fi
+          echo "anos=$ENTRADA" >> "$GITHUB_OUTPUT"
+          echo "fontes=$FONTES" >> "$GITHUB_OUTPUT"
+          echo "Anos: $ENTRADA | Fontes: $FONTES"
+
+      - name: Restaurar clima da execução anterior
+        run: |
+          mkdir -p datalake
+          if gh release download "$RELEASE_TAG" -p "$ASSET" -D . 2>/dev/null; then
+            tar -xzf "$ASSET" -C datalake
+            rm -f "$ASSET"
+            echo "Clima anterior restaurado."
+          else
+            echo "Sem release anterior; começando do zero."
+          fi
+
+      - name: Rodar pipeline de clima
+        env:
+          ANOS: ${{ steps.par.outputs.anos }}
+          FONTES: ${{ steps.par.outputs.fontes }}
+        run: python clima_datalake.py --anos $ANOS --fontes $FONTES --apagar-zip
+
+      - name: Empacotar
+        run: tar -czf "$ASSET" -C datalake clima qa clima_municipal_diario.csv
+
+      - name: Publicar na Release
+        run: |
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" \
+              --title "Clima - Município do Rio de Janeiro" \
+              --notes "Séries históricas de clima do MRJ (INMET e Alerta Rio) em Parquet por variável: horário, diário por estação e média municipal. Atualizado automaticamente."
+          fi
+          gh release upload "$RELEASE_TAG" "$ASSET" datalake/clima_municipal_diario.csv --clobber
