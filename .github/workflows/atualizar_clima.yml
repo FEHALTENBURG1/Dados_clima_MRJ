@@ -98,4 +98,4 @@ jobs:
               --title "Clima - Município do Rio de Janeiro" \
               --notes "Séries históricas de clima do MRJ (INMET e Alerta Rio) em Parquet por variável: horário, diário por estação e média municipal, mais índice de calor e HAAT diários (haat_diario_municipal.csv). Atualizado automaticamente."
           fi
-          gh release upload "$RELEASE_TAG" "$ASSET" datalake/cli
+          gh release upload "$RELEASE_TAG" "$ASSET" datalake/clima_municipal_diario.csv datalake/haat_diario_municipal.csv --clobber
