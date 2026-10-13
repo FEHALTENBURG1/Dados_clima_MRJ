@@ -275,10 +275,16 @@ def baixar_alertario(ano: int, est: int, sessao: requests.Session, token: str) -
 
 
 def _ler_txt_alertario(texto: str, nome: str) -> pd.DataFrame:
+    colunas = ["dia", "hora", "chuva", "dir", "vel", "temp", "pres", "umid"]
+    texto = texto.lstrip("﻿")
+    if not texto.strip():
+        # a fonte publica alguns meses como arquivo vazio (estação sem dados, p. ex. São Cristóvão 2022-05)
+        log.warning("  %s: arquivo vazio na fonte; mês sem dados", nome)
+        return pd.DataFrame(columns=colunas)
     linhas = texto.splitlines()
-    ini = next((i for i, l in enumerate(linhas) if l.startswith("Dia")), None)
+    ini = next((i for i, l in enumerate(linhas) if l.lstrip().startswith("Dia")), None)
     if ini is None:
-        raise ValueError(f"{nome}: cabeçalho não encontrado")
+        raise ValueError(f"{nome}: cabeçalho não encontrado (o arquivo tem conteúdo, mas não o layout esperado)")
     cab = linhas[ini].split()
     if cab[:3] != ["Dia", "Hora", "HBV"] or cab[3:] != ["Chuva", "DirVento", "VelVento", "Temperatura", "Pressao", "Umidade"]:
         raise ValueError(f"{nome}: colunas inesperadas {cab}")
@@ -290,7 +296,7 @@ def _ler_txt_alertario(texto: str, nome: str) -> pd.DataFrame:
         if p[2] == "HBV":          # marcador de horário de verão: o campo vem preenchido
             p = p[:2] + p[3:]
         out.append(p[:8])
-    return pd.DataFrame(out, columns=["dia", "hora", "chuva", "dir", "vel", "temp", "pres", "umid"])
+    return pd.DataFrame(out, columns=colunas)
 
 
 def processar_alertario(ano: int, est: int, conteudo: bytes) -> pd.DataFrame:
@@ -301,7 +307,9 @@ def processar_alertario(ano: int, est: int, conteudo: bytes) -> pd.DataFrame:
             frames.append(_ler_txt_alertario(z.read(nome).decode("utf-8", errors="replace"), nome))
     if not frames:
         return pd.DataFrame()
-    d = pd.concat(frames, ignore_index=True)
+    d = pd.concat([f for f in frames if not f.empty], ignore_index=True) if any(not f.empty for f in frames) else pd.DataFrame()
+    if d.empty:
+        return pd.DataFrame()
     local = pd.to_datetime(d["dia"] + " " + d["hora"], format="%d/%m/%Y %H:%M:%S", errors="coerce")
     d["dt_utc"] = local + pd.Timedelta(hours=FUSO_HORAS)
     d = d[d["dt_utc"].notna()].copy()
