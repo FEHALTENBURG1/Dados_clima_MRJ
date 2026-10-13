@@ -37,6 +37,7 @@ Uso
 python clima_datalake.py --anos 2023 2024 2025 2026
 python clima_datalake.py --ano-ini 2006 --ano-fim 2026
 python clima_datalake.py --fontes inmet --anos 2024
+python clima_datalake.py --fontes metar --anos 2020   # opcional: aeroportos (SBGL, SBJR, SBAF)
 """
 from __future__ import annotations
 
@@ -97,6 +98,13 @@ ALERTARIO = {
     28: ("AR28", "Alto da Boa Vista", -22.96583, -43.27833, 355.0),
     32: ("AR32", "São Cristóvão",     -22.89667, -43.22167, 25.0),
 }
+# aeroportos (METAR via Iowa Environmental Mesonet, que espelha o METAR da REDEMET sem exigir chave)
+METAR = {
+    "SBGL": ("SBGL", "Aeroporto Internacional do Rio de Janeiro (Galeão)", -22.809,  -43.2436, None),
+    "SBJR": ("SBJR", "Aeroporto de Jacarepaguá",                          -22.9867, -43.3719, None),
+    "SBAF": ("SBAF", "Base Aérea dos Afonsos",                            -22.875,  -43.3844, None),
+}
+URL_IEM = "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py"
 URL_INMET = "https://portal.inmet.gov.br/uploads/dadoshistoricos/{ano}.zip"
 URL_ALERTARIO = "http://websempre.rio.rj.gov.br/dados/pluviometricos/met/"
 
@@ -339,6 +347,46 @@ def processar_alertario(ano: int, est: int, conteudo: bytes) -> pd.DataFrame:
     return pd.concat(partes, ignore_index=True)
 
 
+
+# --------------------------------------------------------------------------
+# METAR dos aeroportos (SBGL, SBJR, SBAF) via Iowa Environmental Mesonet
+# --------------------------------------------------------------------------
+def baixar_metar(ano: int, icao: str, sessao: requests.Session) -> str | None:
+    params = [("station", icao), ("data", "tmpf"), ("data", "dwpf"), ("data", "relh"), ("data", "drct"),
+              ("data", "sknt"), ("year1", ano), ("month1", 1), ("day1", 1), ("year2", ano + 1), ("month2", 1),
+              ("day2", 1), ("tz", "Etc/UTC"), ("format", "onlycomma"), ("latlon", "no"), ("missing", "M"),
+              ("trace", "T"), ("direct", "no"), ("report_type", 3)]
+    r = _http(sessao, "GET", URL_IEM, params=params, timeout=300)
+    txt = r.text
+    if not txt.startswith("station,valid") or txt.count("\n") < 2:
+        return None
+    return txt
+
+
+def processar_metar(icao: str, texto: str) -> pd.DataFrame:
+    eid, nome_est = METAR[icao][0], METAR[icao][1]
+    d = pd.read_csv(io.StringIO(texto), na_values=["M", "T"], dtype=str)
+    d["dt"] = pd.to_datetime(d["valid"], format="%Y-%m-%d %H:%M", errors="coerce")
+    d = d[d["dt"].notna()].copy()
+    d = d[d["dt"].dt.minute < 30]                       # leitura rotineira da hora cheia
+    d["dt_utc"] = d["dt"].dt.floor("h")
+    d = d.sort_values("dt").drop_duplicates("dt_utc", keep="first")
+    num = lambda c: pd.to_numeric(d[c], errors="coerce")  # noqa: E731
+    vals = {
+        "temperatura":      (num("tmpf") - 32) / 1.8,
+        "ponto_orvalho":    (num("dwpf") - 32) / 1.8,
+        "umidade":          num("relh"),
+        "vento_velocidade": num("sknt") * 0.514444,       # nós -> m/s
+        "vento_direcao":    num("drct"),
+    }
+    partes = []
+    for var, serie in vals.items():
+        v = pd.DataFrame({"dt_utc": d["dt_utc"].to_numpy(), "valor": serie.to_numpy()})
+        v["estacao_id"], v["estacao_nome"], v["variavel"], v["n_obs"] = eid, nome_est, var, 1
+        partes.append(v)
+    return pd.concat(partes, ignore_index=True)
+
+
 # --------------------------------------------------------------------------
 # Padronização, grade horária e gravação
 # --------------------------------------------------------------------------
@@ -549,6 +597,34 @@ def rodar(anos: list[int], fontes: list[str], raiz: Path, pasta_zip: Path, forca
             except Exception as e:  # noqa: BLE001
                 log.error("Alerta Rio %d falhou: %s", ano, e)
                 falhas.append(f"Alerta Rio {ano}")
+        if "metar" in fontes:
+            try:
+                sess_m = requests.Session()
+                sess_m.headers.update(UA)
+                partes = []
+                for icao in METAR:
+                    txt = baixar_metar(ano, icao, sess_m)
+                    time.sleep(1)
+                    if not txt:
+                        log.info("METAR %d %s: sem dados", ano, icao)
+                        continue
+                    p = processar_metar(icao, txt)
+                    if not p.empty:
+                        partes.append(p)
+                if partes:
+                    longo = pd.concat(partes, ignore_index=True)
+                    longo, fora = aplicar_faixas(longo)
+                    gravar_horario(longo, raiz, ano, "METAR")
+                    qa_partes.append(resumo_qa(longo, ano, "METAR", fora))
+                    cadastro += [dict(fonte="METAR", estacao_id=v[0], estacao_nome=v[1], latitude=v[2], longitude=v[3], altitude=v[4])
+                                 for v in METAR.values()]
+                    tocados.add(ano)
+                    log.info("METAR %d: %d aeroportos, %s linhas", ano, len(partes), f"{len(longo):,}")
+                else:
+                    log.warning("METAR %d: nenhum aeroporto com dados", ano)
+            except Exception as e:  # noqa: BLE001
+                log.error("METAR %d falhou: %s", ano, e)
+                falhas.append(f"METAR {ano}")
     if tocados:
         locais = set(tocados) | {a - 1 for a in tocados}
         log.info("Recalculando diário e municipal para %s", sorted(locais))
@@ -568,7 +644,8 @@ def main() -> None:
     ap.add_argument("--anos", nargs="*", type=int)
     ap.add_argument("--ano-ini", type=int, default=ANO_INI_PADRAO)
     ap.add_argument("--ano-fim", type=int, default=datetime.now().year)
-    ap.add_argument("--fontes", nargs="*", choices=["inmet", "alertario"], default=["inmet", "alertario"])
+    ap.add_argument("--fontes", nargs="*", choices=["inmet", "alertario", "metar"], default=["inmet", "alertario"],
+                    help="metar (aeroportos SBGL, SBJR, SBAF, via Iowa Environmental Mesonet) é opcional e não entra por padrão")
     ap.add_argument("--raiz", type=Path, default=Path("datalake/clima"))
     ap.add_argument("--pasta-zip", type=Path, default=Path("datalake/raw_clima"))
     ap.add_argument("--forcar-download", action="store_true")
