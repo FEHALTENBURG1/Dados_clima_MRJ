@@ -20,9 +20,6 @@ Como cada pedaço é calculado
 Uso
   python haat_clima.py --raiz datalake/clima --saida haat_diario_municipal.csv
   python haat_clima.py --raiz datalake/clima --ano-ini 2012 --ano-fim 2024 --comparar dados/temp_df.csv
-
-Observação: o artigo também usa três aeroportos da REDEMET, que não estão no lago; por isso os valores
-diferem um pouco dos publicados (ver --comparar).
 """
 from __future__ import annotations
 
