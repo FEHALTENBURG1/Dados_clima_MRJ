@@ -9,7 +9,7 @@ clima/horario/temperatura,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de J
 clima/horario/temperatura_max,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.26,"Valor horário por estação, hora em UTC. Variável: temperatura_max."
 clima/horario/temperatura_min,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.25,"Valor horário por estação, hora em UTC. Variável: temperatura_min."
 clima/horario/umidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.26,"Valor horário por estação, hora em UTC. Variável: umidade."
-clima/horario/vento_direcao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,7.17,"Valor horário por estação, hora em UTC. Variável: vento_direcao."
+clima/horario/vento_direcao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,7.16,"Valor horário por estação, hora em UTC. Variável: vento_direcao."
 clima/horario/vento_rajada,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,602496,2006,2026,,,2.72,"Valor horário por estação, hora em UTC. Variável: vento_rajada."
 clima/horario/vento_velocidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.05,"Valor horário por estação, hora em UTC. Variável: vento_velocidade."
 clima/diario/ponto_orvalho,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,23263,2006,2026,,,0.25,"Resumo diário por estação, dia local (UTC-3). Variável: ponto_orvalho."
