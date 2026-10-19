@@ -85,7 +85,6 @@ Hoje `datalake/` tem cerca de 200 MB. Como o Parquet é regravado inteiro a cada
 - `agregar_obitos.py`: gera `obitos_diarios_ocorrencia_mrj.csv` a partir do recorte de ocorrência.
 - `catalogar.py`: gera `datalake/CATALOGO.md` e `datalake/catalogo.csv`.
 - `.github/scripts/commitar_dados.sh`: commita as mudanças de `datalake/` e atualiza o catálogo, tentando de novo se outro fluxo tiver publicado antes.
-- `app.R` e `instalar_pacotes.R`: protótipo anterior do painel. O painel atual está no repositório `mortalidade_MRJ`, em `painel_quarto/shiny`.
 
 ## Créditos
 
