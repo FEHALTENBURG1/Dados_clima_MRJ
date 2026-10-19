@@ -1,5 +1,10 @@
-# Dados ficam fora do Git (publicados como asset de Release pelo workflow)
-datalake/
+# Os dados do data lake ficam em datalake/ e SÃO versionados.
+# Ficam de fora apenas os arquivos de trabalho do pipeline e o que foi descontinuado.
+datalake/raw_zip/
+datalake/raw_clima/
+datalake/bronze/
+datalake/silver/sim/combinado_mrj/
+datalake/qa/resumo_combinado.csv
 *.tar.gz
 *.zip
 __pycache__/

@@ -15,7 +15,7 @@ on:
         default: ""
 
 permissions:
-  contents: write # necessário para criar/atualizar a Release com os dados
+  contents: write # commit dos dados no repositório e atualização da Release
 
 concurrency:
   group: atualizar-sim
@@ -30,6 +30,7 @@ jobs:
       RELEASE_TAG: sim-mrj
       ASSET: silver_sim_mrj.tar.gz
     steps:
+      # Os dados já estão no repositório (pasta datalake/); o pipeline só reescreve os anos pedidos.
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
@@ -57,33 +58,30 @@ jobs:
           echo "anos=$ENTRADA" >> "$GITHUB_OUTPUT"
           echo "Anos desta execução: $ENTRADA"
 
-      - name: Restaurar silver da execução anterior
-        run: |
-          mkdir -p datalake
-          if gh release download "$RELEASE_TAG" -p "$ASSET" -D . 2>/dev/null; then
-            tar -xzf "$ASSET" -C datalake
-            rm -f "$ASSET"
-            echo "Silver anterior restaurada."
-          else
-            echo "Sem release anterior; começando do zero."
-          fi
-
       - name: Rodar pipeline (modo direto, só MRJ)
         env:
           ANOS: ${{ steps.anos.outputs.anos }}
         run: python sim_datalake.py direto --anos $ANOS --apagar-zip
 
       - name: Agregar óbitos diários por ocorrência (para o painel)
-        run: python agregar_obitos.py --raiz datalake --saida obitos_diarios_ocorrencia_mrj.csv
+        run: python agregar_obitos.py --raiz datalake --saida datalake/obitos_diarios_ocorrencia_mrj.csv
 
+      - name: Commitar os dados no repositório
+        env:
+          ANOS: ${{ steps.anos.outputs.anos }}
+        run: |
+          .github/scripts/commitar_dados.sh "dados: SIM do MRJ, anos ${ANOS}"
+
+      # Enquanto o painel ainda lê as Releases, elas continuam sendo atualizadas.
+      # O banco combinado foi descontinuado e fica fora do pacote.
       - name: Empacotar silver
-        run: tar -czf "$ASSET" -C datalake silver qa
+        run: tar -czf "$ASSET" -C datalake --exclude='silver/sim/combinado_mrj' --exclude='qa/resumo_combinado.csv' silver qa
 
       - name: Publicar na Release
         run: |
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release create "$RELEASE_TAG" \
               --title "SIM - Mortalidade MRJ (silver)" \
-              --notes "Recortes do município do Rio de Janeiro (ocorrência, residência e combinado), em Parquet particionado por ano. Atualizado automaticamente."
+              --notes "Recortes do município do Rio de Janeiro (ocorrência e residência), em Parquet particionado por ano. Cópia dos dados que estão em datalake/ no repositório. Atualizado automaticamente."
           fi
-          gh release upload "$RELEASE_TAG" "$ASSET" obitos_diarios_ocorrencia_mrj.csv --clobber
+          gh release upload "$RELEASE_TAG" "$ASSET" datalake/obitos_diarios_ocorrencia_mrj.csv --clobber
