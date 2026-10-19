@@ -19,7 +19,7 @@ on:
         default: "inmet alertario"
 
 permissions:
-  contents: write
+  contents: write # commit dos dados no repositório e atualização da Release
 
 concurrency:
   group: atualizar-clima
@@ -34,6 +34,7 @@ jobs:
       RELEASE_TAG: clima-mrj
       ASSET: clima_mrj.tar.gz
     steps:
+      # Os dados já estão no repositório (pasta datalake/); o pipeline só reescreve os anos pedidos.
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
@@ -66,17 +67,6 @@ jobs:
           echo "fontes=$FONTES" >> "$GITHUB_OUTPUT"
           echo "Anos: $ENTRADA | Fontes: $FONTES"
 
-      - name: Restaurar clima da execução anterior
-        run: |
-          mkdir -p datalake
-          if gh release download "$RELEASE_TAG" -p "$ASSET" -D . 2>/dev/null; then
-            tar -xzf "$ASSET" -C datalake
-            rm -f "$ASSET"
-            echo "Clima anterior restaurado."
-          else
-            echo "Sem release anterior; começando do zero."
-          fi
-
       - name: Rodar pipeline de clima
         env:
           ANOS: ${{ steps.par.outputs.anos }}
@@ -88,14 +78,21 @@ jobs:
           python haat_clima.py --raiz datalake/clima --ano-ini 2006 --ano-fim "$(date +%Y)" \
             --saida datalake/haat_diario_municipal.csv
 
+      - name: Commitar os dados no repositório
+        env:
+          ANOS: ${{ steps.par.outputs.anos }}
+        run: |
+          .github/scripts/commitar_dados.sh "dados: clima do MRJ, anos ${ANOS}"
+
+      # Enquanto o painel ainda lê as Releases, elas continuam sendo atualizadas.
       - name: Empacotar
-        run: tar -czf "$ASSET" -C datalake clima qa clima_municipal_diario.csv haat_diario_municipal.csv
+        run: tar -czf "$ASSET" -C datalake --exclude='qa/resumo_combinado.csv' clima qa clima_municipal_diario.csv haat_diario_municipal.csv
 
       - name: Publicar na Release
         run: |
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release create "$RELEASE_TAG" \
               --title "Clima - Município do Rio de Janeiro" \
-              --notes "Séries históricas de clima do MRJ (INMET e Alerta Rio) em Parquet por variável: horário, diário por estação e média municipal, mais índice de calor e HAAT diários (haat_diario_municipal.csv). Atualizado automaticamente."
+              --notes "Séries históricas de clima do MRJ (INMET e Alerta Rio) em Parquet por variável: horário, diário por estação e média municipal, mais índice de calor e HAAT diários (haat_diario_municipal.csv). Cópia dos dados que estão em datalake/ no repositório. Atualizado automaticamente."
           fi
           gh release upload "$RELEASE_TAG" "$ASSET" datalake/clima_municipal_diario.csv datalake/haat_diario_municipal.csv --clobber
