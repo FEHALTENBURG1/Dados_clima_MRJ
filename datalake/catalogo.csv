@@ -1,0 +1,43 @@
+conjunto,formato,particao,fonte,arquivos,linhas,ano_inicio,ano_fim,de,ate,mb,descricao
+silver/sim/ocorrencia_mrj,parquet,ano_arquivo,"OpenDATASUS, Sistema de Informações sobre Mortalidade (SIM), Ministério da Saúde",21,1303625,2006,2026,,,66.77,Declarações de óbito do SIM com ocorrência no município do Rio de Janeiro (código IBGE 330455).
+silver/sim/residencia_mrj,parquet,ano_arquivo,"OpenDATASUS, Sistema de Informações sobre Mortalidade (SIM), Ministério da Saúde",21,1151359,2006,2026,,,58.7,"Declarações de óbito do SIM de residentes no município do Rio de Janeiro, qualquer que seja o local de ocorrência."
+clima/horario/ponto_orvalho,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,602496,2006,2026,,,2.7,"Valor horário por estação, hora em UTC. Variável: ponto_orvalho."
+clima/horario/precipitacao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,4.03,"Valor horário por estação, hora em UTC. Variável: precipitacao."
+clima/horario/pressao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.1,"Valor horário por estação, hora em UTC. Variável: pressao."
+clima/horario/radiacao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,602496,2006,2026,,,3.72,"Valor horário por estação, hora em UTC. Variável: radiacao."
+clima/horario/temperatura,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.84,"Valor horário por estação, hora em UTC. Variável: temperatura."
+clima/horario/temperatura_max,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.26,"Valor horário por estação, hora em UTC. Variável: temperatura_max."
+clima/horario/temperatura_min,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.25,"Valor horário por estação, hora em UTC. Variável: temperatura_min."
+clima/horario/umidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.26,"Valor horário por estação, hora em UTC. Variável: umidade."
+clima/horario/vento_direcao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,7.17,"Valor horário por estação, hora em UTC. Variável: vento_direcao."
+clima/horario/vento_rajada,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,602496,2006,2026,,,2.72,"Valor horário por estação, hora em UTC. Variável: vento_rajada."
+clima/horario/vento_velocidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,1561877,2006,2026,,,5.05,"Valor horário por estação, hora em UTC. Variável: vento_velocidade."
+clima/diario/ponto_orvalho,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,23263,2006,2026,,,0.25,"Resumo diário por estação, dia local (UTC-3). Variável: ponto_orvalho."
+clima/diario/precipitacao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,64541,2006,2026,,,0.24,"Resumo diário por estação, dia local (UTC-3). Variável: precipitacao."
+clima/diario/pressao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,38413,2006,2026,,,0.36,"Resumo diário por estação, dia local (UTC-3). Variável: pressao."
+clima/diario/radiacao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,24246,2006,2026,,,0.31,"Resumo diário por estação, dia local (UTC-3). Variável: radiacao."
+clima/diario/temperatura,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,59132,2006,2026,,,0.74,"Resumo diário por estação, dia local (UTC-3). Variável: temperatura."
+clima/diario/temperatura_max,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,59127,2006,2026,,,0.25,"Resumo diário por estação, dia local (UTC-3). Variável: temperatura_max."
+clima/diario/temperatura_min,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,59127,2006,2026,,,0.24,"Resumo diário por estação, dia local (UTC-3). Variável: temperatura_min."
+clima/diario/umidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,56757,2006,2026,,,0.56,"Resumo diário por estação, dia local (UTC-3). Variável: umidade."
+clima/diario/vento_direcao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,39745,2006,2026,,,0.49,"Resumo diário por estação, dia local (UTC-3). Variável: vento_direcao."
+clima/diario/vento_rajada,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,24070,2006,2026,,,0.18,"Resumo diário por estação, dia local (UTC-3). Variável: vento_rajada."
+clima/diario/vento_velocidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,40255,2006,2026,,,0.45,"Resumo diário por estação, dia local (UTC-3). Variável: vento_velocidade."
+clima/municipal/ponto_orvalho,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7334,2006,2026,,,0.15,Média das estações do município por dia local. Variável: ponto_orvalho.
+clima/municipal/precipitacao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7596,2006,2026,,,0.13,Média das estações do município por dia local. Variável: precipitacao.
+clima/municipal/pressao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7570,2006,2026,,,0.16,Média das estações do município por dia local. Variável: pressao.
+clima/municipal/radiacao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7429,2006,2026,,,0.15,Média das estações do município por dia local. Variável: radiacao.
+clima/municipal/temperatura,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7586,2006,2026,,,0.28,Média das estações do município por dia local. Variável: temperatura.
+clima/municipal/temperatura_max,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7586,2006,2026,,,0.15,Média das estações do município por dia local. Variável: temperatura_max.
+clima/municipal/temperatura_min,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7586,2006,2026,,,0.15,Média das estações do município por dia local. Variável: temperatura_min.
+clima/municipal/umidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7581,2006,2026,,,0.25,Média das estações do município por dia local. Variável: umidade.
+clima/municipal/vento_direcao,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7561,2006,2026,,,0.17,Média das estações do município por dia local. Variável: vento_direcao.
+clima/municipal/vento_rajada,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7377,2006,2026,,,0.13,Média das estações do município por dia local. Variável: vento_rajada.
+clima/municipal/vento_velocidade,parquet,ano,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),21,7579,2006,2026,,,0.24,Média das estações do município por dia local. Variável: vento_velocidade.
+clima_municipal_diario.csv,csv,,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),1,7596,2006,2026,2006-01-01,2026-10-18,1.17,Tabela larga com o clima municipal diário (todas as variáveis).
+haat_diario_municipal.csv,csv,,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),1,7117,2007,2026,2007-01-01,2026-10-19,0.72,"Índice de calor e métrica HAAT diários do município, calculados a partir do clima municipal."
+obitos_diarios_ocorrencia_mrj.csv,csv,,"OpenDATASUS, Sistema de Informações sobre Mortalidade (SIM), Ministério da Saúde",1,186346,2006,2026,2006-01-01,2026-08-26,12.49,"Contagem diária de óbitos por ocorrência, por faixa etária e capítulo da CID-10."
+clima/estacoes.csv,csv,,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),1,12,,,,,0.0,Cadastro das estações meteorológicas usadas.
+qa/resumo_ocorrencia.csv,csv,,"OpenDATASUS, Sistema de Informações sobre Mortalidade (SIM), Ministério da Saúde",1,21,,,,,0.0,Controle de qualidade por ano: óbitos no Brasil e no recorte de ocorrência.
+qa/resumo_residencia.csv,csv,,"OpenDATASUS, Sistema de Informações sobre Mortalidade (SIM), Ministério da Saúde",1,21,,,,,0.0,Controle de qualidade por ano: óbitos no Brasil e no recorte de residência.
+qa/resumo_clima.csv,csv,,INMET e Alerta Rio (Prefeitura do Rio de Janeiro),1,1701,,,,,0.15,"Controle de qualidade do clima por estação, ano e variável."
