@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Data lake do SIM (Mortalidade Geral) - Município do Rio de Janeiro (IBGE 330455)
+DB SIM (Mortalidade Geral) - Município do Rio de Janeiro (IBGE 330455)
 
 Camadas
 -------
